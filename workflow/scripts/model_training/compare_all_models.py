@@ -4,6 +4,7 @@ import click
 import numpy as np
 import pandas as pd
 import scipy
+import ast
 from training_functions import (
     statistic_aupr,
     statistic_precision_at_threshold,
@@ -16,25 +17,43 @@ def performance_summary(
 ):
     # read in predicitons
     if model_id == "distance":
-        crispr_data = pd.read_csv(crispr_data, sep="\t")
-        crispr_data["distance"] = np.abs(
-            (crispr_data["chromStart"] + crispr_data["chromEnd"]) / 2
-            - (crispr_data["startTSS"] + crispr_data["endTSS"]) / 2
+        # Determine whether crispr_data is a str or dict
+        if crispr_data.strip().startswith('{') and crispr_data.strip().endswith('}'):
+            all_crispr_dfs = []
+            print("INFO: --crispr_data appears to be a dictionary. Parsing and concatenating all files.")
+            try:
+                # Safely parse the string into a Python dictionary
+                crispr_data_dict = ast.literal_eval(crispr_data)
+                if not isinstance(crispr_data_dict, dict):
+                    raise TypeError("Parsed data is not a dictionary.")
+                
+                # Iterate through the file paths in the dictionary's values
+                for key, filepath in crispr_data_dict.items():
+                    print(f"  - Loading '{key}': {filepath}")
+                    df = pd.read_csv(filepath, sep="\t")
+                    all_crispr_dfs.append(df)
+                
+                # Concatenate all loaded DataFrames into one
+                crispr_df = pd.concat(all_crispr_dfs, ignore_index=True)
+                
+            except (ValueError, SyntaxError, TypeError) as e:
+                # If parsing fails, raise an error because the format was ambiguous
+                raise ValueError(f"Failed to parse --crispr_data as a dictionary. Error: {e}. Content: {crispr_data}")
+        else:
+            # If it's not a dictionary string, treat it as a single file path
+            print(f"INFO: --crispr_data is a single file path. Loading: {crispr_data}")
+            crispr_df = pd.read_csv(crispr_data, sep="\t")
+
+        # Calculate distance
+        crispr_df["distance"] = np.abs(
+            (crispr_df["chromStart"] + crispr_df["chromEnd"]) / 2
+            - (crispr_df["startTSS"] + crispr_df["endTSS"]) / 2
         )
-        crispr_data = crispr_data.dropna(subset=["Regulated", "distance"])
-        Y_true_all = crispr_data["Regulated"].values.astype(np.int64)
-        Y_pred_all = crispr_data["distance"] * -1
+        crispr_df = crispr_df.dropna(subset=["Regulated", "distance"])
+        Y_true_all = crispr_df["Regulated"].values.astype(np.int64)
+        Y_pred_all = crispr_df["distance"] * -1
         pct_missing = 0
     else:  # normal models
-        # pred_file = os.path.join(
-        #     out_dir, dataset, model_id, "model", "training_predictions.tsv"
-        # )
-        # missing_file = os.path.join(
-        #     out_dir,
-        #     dataset,
-        #     model_id,
-        #     "missing.EPCrisprBenchmark_ensemble_data_GRCh38.K562_features_NAfilled.tsv.gz",
-        # )
         pred_df = pd.read_csv(pred_file, sep="\t")
         missing_df = pd.read_csv(missing_file, sep="\t")
 

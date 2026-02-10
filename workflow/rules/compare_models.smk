@@ -22,7 +22,7 @@ rule gather_model_performances:
 			--all_missing "{input.all_missing}" \
 			--model_config_file {params.model_config_file} \
 			--output_file {output.comp_table}  \
-			--crispr_data {params.crispr_dataset} \
+			--crispr_data "{params.crispr_dataset}" \
 			--out_dir {params.out_dir}
 		"""
 
