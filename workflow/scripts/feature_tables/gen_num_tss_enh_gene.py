@@ -4,7 +4,7 @@ import pandas as pd
 
 
 def determine_num_tss_enh_gene(
-    pred_df, ref_gene_tss, extended_enhancers, enhancer_tss_int, out_file
+    pred_df, ref_gene_tss, extended_enhancers, out_file
 ):
     #  make the end be midpoint of enhancer + distance (This gives you the end coordinate of distance range)
     pred_df["midpoint"] = ((pred_df["start"] + pred_df["end"]) / 2).astype("int")
@@ -41,15 +41,14 @@ def determine_num_tss_enh_gene(
 @click.option("--abc_predictions")
 @click.option("--ref_gene_tss")
 @click.option("--extended_enhancers")
-@click.option("--enhancer_tss_int")
 @click.option("--out_file")
-def main(abc_predictions, ref_gene_tss, extended_enhancers, enhancer_tss_int, out_file):
+def main(abc_predictions, ref_gene_tss, extended_enhancers, out_file):
     pred_df = pd.read_csv(abc_predictions, sep="\t", compression="gzip")
     if len(pred_df) == 0:
         raise Exception("Did not find any enhancers in the Predictions file")
 
     determine_num_tss_enh_gene(
-        pred_df, ref_gene_tss, extended_enhancers, enhancer_tss_int, out_file
+        pred_df, ref_gene_tss, extended_enhancers, out_file
     )
 
 
