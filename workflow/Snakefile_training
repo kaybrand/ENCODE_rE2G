@@ -8,7 +8,6 @@ import yaml
 
 model_config = pd.read_table(config["model_config"], na_values="").fillna("None").set_index("model", drop=False)
 dataset_config = pd.read_table(config["dataset_config"], na_values="").set_index("biosample", drop=False)
-conda: "mamba"
 
 # import utils and make config paths absolute
 MAX_MEM_MB = config["max_memory_allocation_mb"]
