@@ -1,6 +1,5 @@
 from snakemake.utils import min_version
 min_version("7.0")
-conda: "mamba"
 
 import pandas as pd
 import os
