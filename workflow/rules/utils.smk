@@ -149,15 +149,21 @@ def process_abc_directory_column(model_config):
 	ABC_BIOSAMPLES_DIR = {}
 	for row in model_config.itertuples(index=False):
 		model_datasets = [item.strip() for item in row.dataset.split(",")]
-		for ds in model_datasets:
-			if ds not in ABC_BIOSAMPLES_DIR: 
-				if row.ABC_directory=="None": # ABC directory is not provided
+		if row.ABC_directory == "None":
+			abc_dirs = [None] * len(model_datasets)
+		else:
+			abc_dirs = [item.strip() or None for item in row.ABC_directory.split(",")]
+			if len(abc_dirs) != len(model_datasets):
+				raise Exception(f"Number of ABC_directory entries must match number of datasets for model with datasets: {row.dataset}")
+		for ds, abc_dir in zip(model_datasets, abc_dirs):
+			if ds not in ABC_BIOSAMPLES_DIR:
+				if abc_dir is None: # ABC directory is not provided
 					if ds not in dataset_config['biosample']: # is there info to run ABC?
 						raise Exception(f"Dataset {ds} not specified in dataset_config.")
 					ABC_BIOSAMPLES_DIR[ds] = os.path.join(RESULTS_DIR, ds)
 				else: # ABC directory is provided
-					ABC_BIOSAMPLES_DIR[ds] = ds
-	
+					ABC_BIOSAMPLES_DIR[ds] = abc_dir
+
 	return ABC_BIOSAMPLES_DIR
 
 def _validate_model_dir(potential_dir):
