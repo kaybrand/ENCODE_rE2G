@@ -24,7 +24,12 @@ SCRIPTS_DIR = os.path.join(E2G_DIR_PATH, "workflow/scripts")
 # process configs
 model_config = process_model_config(model_config)
 model_dataset_dict = make_model_dataset_dict(model_config, dataset_config) # dictionary of dictionaries: model: {crispr_ct: dataset, ...}
-print(model_dataset_dict)
+print("\n=== Model interpretation (verify this matches your intent) ===")
+for model_name, ct_dataset_map in model_dataset_dict.items():
+    print(f"  Model: {model_name}")
+    for crispr_ct, dataset in ct_dataset_map.items():
+        print(f"    CRISPR cell type '{crispr_ct}'  <--  dataset '{dataset}'")
+print("=============================================================\n")
 
 # import ABC submodule
 module ABC:
