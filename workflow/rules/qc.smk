@@ -12,6 +12,8 @@ rule get_stats:
 		accessibility = get_accessibility_files
 	params:
 		scripts_dir = SCRIPTS_DIR
+	benchmark:
+		bench("get_stats", "biosample", "model_name", "threshold")
 	conda:
 		"../envs/encode_re2g.yml"
 	resources:
@@ -31,6 +33,8 @@ rule generate_plots:
         )
 	params:
 		scripts_dir = SCRIPTS_DIR
+	benchmark:
+		bench("generate_plots")
 	conda:
 		"../envs/encode_re2g.yml"
 	resources:

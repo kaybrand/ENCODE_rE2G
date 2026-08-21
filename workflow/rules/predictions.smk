@@ -8,6 +8,8 @@ rule make_biosample_feature_table:  # make feature table per biosample
 		model_dirs = lambda wildcards: BIOSAMPLE_DF.loc[BIOSAMPLE_DF['biosample'] == wildcards.biosample]['model_dir'].to_list(),
 		#biosample_config = config["ABC_BIOSAMPLES_MODELS"],
 		e2g_path = config["E2G_DIR_PATH"]
+	benchmark:
+		bench("make_biosample_feature_table", "biosample")
 	conda:
 		"../envs/encode_re2g.yml"
 	resources:
@@ -23,6 +25,8 @@ rule format_external_features_config:
 		external_features_config = os.path.join(RESULTS_DIR, "{dataset}", "external_features_config.tsv"),
 	params:
 		e2g_path = config["E2G_DIR_PATH"]
+	benchmark:
+		bench("format_external_features_config", "dataset")
 	conda:
 		"../envs/encode_re2g.yml"
 	resources:
@@ -39,6 +43,8 @@ rule generate_e2g_predictions:
 		trained_model = lambda wildcards: get_trained_model(wildcards.biosample, wildcards.model_name),
 		tpm_threshold = lambda wildcards: get_tpm_threshold(wildcards.biosample, wildcards.model_name),
 		scripts_dir = SCRIPTS_DIR
+	benchmark:
+		bench("generate_e2g_predictions", "biosample", "model_name")
 	conda:
 		"../envs/encode_re2g.yml"
 	resources:
@@ -64,6 +70,8 @@ rule filter_e2g_predictions:
 		include_self_promoter = config["include_self_promoter"],
 		score_col = config["final_score_col"],
 		scripts_dir = SCRIPTS_DIR
+	benchmark:
+		bench("filter_e2g_predictions", "biosample", "model_name", "threshold")
 	conda:
 		"../envs/encode_re2g.yml"
 	resources:
@@ -88,6 +96,8 @@ rule write_predictions_bedpe:
 		scripts_dir = SCRIPTS_DIR
 	output:
 		bedpe = os.path.join(IGV_DIR, "{biosample}", "{model_name}", "encode_e2g_predictions_threshold{threshold}.bedpe")
+	benchmark:
+		bench("write_predictions_bedpe", "biosample", "model_name", "threshold")
 	conda:
 		"../envs/encode_re2g.yml"
 	resources:
@@ -109,6 +119,8 @@ rule write_accessibility_bw_file:
 	output:
 		out_bw = os.path.join(IGV_DIR, "{biosample}", "{access_simple_id}.bw"),
 		out_bg = temp(os.path.join(IGV_DIR, "{biosample}", "{access_simple_id}.bg"))
+	benchmark:
+		bench("write_accessibility_bw_file", "biosample", "access_simple_id")
 	conda:
 		"../envs/encode_re2g.yml"
 	resources:

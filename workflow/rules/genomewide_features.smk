@@ -7,6 +7,8 @@ checkpoint basic_features_required: # (vs scE2G feature_required)
 		numCandidateEnhGene = os.path.join(RESULTS_DIR, "{sample}", "new_features", "generate_numCandidateEnhGene.txt"), # file with NumCandidateEnhGene, NumTSSEnhGene, NumEnhancersEGXkb, SumEnhancersEGXkb
 		numTSSEnhGene = os.path.join(RESULTS_DIR, "{sample}", "new_features", "generate_numTSSEnhGene.txt"),
 		nearbyEnhancers = os.path.join(RESULTS_DIR, "{sample}", "new_features", "generate_nearbyEnhancers.txt"),
+	benchmark:
+		bench("basic_features_required", "sample")
 	run:
 		req_numCandidateEnhGene = "False"
 		req_numTSSEnhGene = "False"
@@ -70,6 +72,8 @@ rule generate_num_candidate_enh_gene:
 		abc_predictions = lambda wildcards: os.path.join(ABC_BIOSAMPLES_DIR[wildcards.biosample], "Predictions", "EnhancerPredictionsAllPutative.tsv.gz"),
 	params:
 		scripts_dir = SCRIPTS_DIR
+	benchmark:
+		bench("generate_num_candidate_enh_gene", "biosample")
 	conda:
 		"../envs/encode_re2g.yml"
 	resources:
@@ -90,6 +94,8 @@ rule generate_num_tss_enh_gene:
 	params:
 		gene_TSS500 = config['gene_TSS500'],
 		scripts_dir = SCRIPTS_DIR
+	benchmark:
+		bench("generate_num_tss_enh_gene", "biosample")
 	conda:
 		"../envs/encode_re2g.yml"
 	resources:
@@ -114,6 +120,8 @@ rule generate_num_sum_enhancers:
 	params:
 		chr_sizes = config['chr_sizes'],
 		scripts_dir = SCRIPTS_DIR
+	benchmark:
+		bench("generate_num_sum_enhancers", "biosample", "kb")
 	conda:
 		"../envs/encode_re2g.yml"
 	resources:
@@ -153,6 +161,8 @@ rule activity_only_features:
 		geneClasses = config["gene_classes"]
 	output: 
 		predictions_extended = os.path.join(RESULTS_DIR, "{biosample}", "ActivityOnly_features.tsv.gz")
+	benchmark:
+		bench("activity_only_features", "biosample")
 	conda:
 		"../envs/encode_re2g.yml"
 	resources:
@@ -173,6 +183,8 @@ rule add_external_features:
 		external_features_config = ancient(os.path.join(RESULTS_DIR, "{biosample}", "external_features_config.tsv"))
 	output:
 		plus_external_features = os.path.join(RESULTS_DIR, "{biosample}",  "ActivityOnly_plus_external_features.tsv.gz")
+	benchmark:
+		bench("add_external_features", "biosample")
 	conda:
 		"../envs/encode_re2g.yml"
 	resources:
@@ -187,6 +199,8 @@ rule gen_final_features:
 		feature_table_file = os.path.join(RESULTS_DIR, "{biosample}", "feature_table.tsv")
 	output:
 		final_features = os.path.join(RESULTS_DIR, "{biosample}", "genomewide_features.tsv.gz")
+	benchmark:
+		bench("gen_final_features", "biosample")
 	conda:
 		"../envs/encode_re2g.yml"
 	resources:
